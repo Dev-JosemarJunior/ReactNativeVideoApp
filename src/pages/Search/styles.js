@@ -43,6 +43,7 @@ export const LoadContainer = styled.View`
 export const ButtonLoader = styled.TouchableOpacity`
     width: 46px;
     height: 46px;
+    margin: 0 30px;
     background-color: rgba(25, 26, 48, 0.8);
     border-radius: 23px;
     justify-content: center;

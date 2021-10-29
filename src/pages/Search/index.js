@@ -13,7 +13,7 @@ import api, { key } from '../../Services/api';
 import SearchItem from '../../components/SearchItem'
 
 
-export default function Search({name: input}){
+export default function Search(){
     
     const navigation = useNavigation();
     const route = useRoute();
@@ -38,9 +38,10 @@ export default function Search({name: input}){
             })
 
             if(isActive){
+
                 if (response.data.total_pages >= page){
                     const newMovies = response.data.results;
-                    setMovie([...dataMovie, ...newMovies]);
+                    setMovie(newMovies);
                     setLoading(false);
                 } 
                 setTotalPageResults(response.data.total_pages);
@@ -49,12 +50,11 @@ export default function Search({name: input}){
 
         if(isActive){
             getSearchMovie();
-            
         }
 
         return () => {
             isActive = false;
-            
+            setMovie([]);
         }
 
     }, [page])
@@ -65,13 +65,101 @@ export default function Search({name: input}){
 
     const loadLoader = () =>{
 
+            if (page == 1){
+                return (
+                    <LoadContainer>
+                            <ButtonLoader activeOpacity={0.7} onPress={ () => loadLess()}>
+                                <Feather
+                                    name=""
+                                    size={28}
+                                    color="#FFF"
+                            />
+                            </ButtonLoader>
+                            <Name>{page} / {totalPagesResults}</Name>
+                            <ButtonLoader activeOpacity={0.7} onPress={ () => loadMore()}>
+                                <Feather
+                                    name="arrow-right"
+                                    size={28}
+                                    color="#FFF"
+                                />
+                            </ButtonLoader>
+                    </LoadContainer>
+                )
+            } else if (page < totalPagesResults ){
+                return (
+                    <LoadContainer>
+                            <ButtonLoader activeOpacity={0.7} onPress={ () => loadLess()}>
+                                <Feather
+                                    name="arrow-left"
+                                    size={28}
+                                    color="#FFF"
+                            />
+                            </ButtonLoader>
+                            <Name>{page} / {totalPagesResults}</Name>
+                            <ButtonLoader activeOpacity={0.7} onPress={ () => loadMore()}>
+                                <Feather
+                                    name="arrow-right"
+                                    size={28}
+                                    color="#FFF"
+                                />
+                            </ButtonLoader>
+                    </LoadContainer>
+                )
+            } else {
+                return (
+                    <LoadContainer>
+                            <ButtonLoader activeOpacity={0.7} onPress={ () => loadLess()}>
+                                <Feather
+                                    name="arrow-left"
+                                    size={28}
+                                    color="#FFF"
+                            />
+                            </ButtonLoader>
+                            <Name>{page} / {totalPagesResults}</Name>
+                            <ButtonLoader activeOpacity={0.7} onPress={ () => loadMore()}>
+                                <Feather
+                                    name=""
+                                    size={28}
+                                    color="#FFF"
+                                />
+                            </ButtonLoader>
+                    </LoadContainer>
+                )
+            }
             return(
                 <LoadContainer>
                     {totalPagesResults > page ? (
+                        
                         <LoadContainer>
-                            <ActivityIndicator  size="large" color="#FFF"/>
+                            
+                            <ButtonLoader activeOpacity={0.7} onPress={ () => loadLess()}>
+                                <Feather
+                                    name="arrow-left"
+                                    size={28}
+                                    color="#FFF"
+                                />
+                            </ButtonLoader>
+                            <Name>{page} / {totalPagesResults}</Name>
+                            <ButtonLoader activeOpacity={0.7} onPress={ () => loadMore()}>
+                                <Feather
+                                    name="arrow-right"
+                                    size={28}
+                                    color="#FFF"
+                                 />
+                            </ButtonLoader>
                         </LoadContainer>
-                    ): null}
+                    ): (
+                        <LoadContainer>
+                            <ButtonLoader activeOpacity={0.7} onPress={ () => loadLess()}>
+                                <Feather
+                                    name="arrow-left"
+                                    size={28}
+                                    color="#FFF"
+                                />
+                            </ButtonLoader>
+                            <Name>{page} / {totalPagesResults}</Name>
+                        </LoadContainer>
+                    )}
                     
                 </LoadContainer>
             )
@@ -83,7 +171,13 @@ export default function Search({name: input}){
             setDataMovie(movie);
             setPage((page + 1));
         }
-        // alert('Passando por aqui');
+    }
+
+    function loadLess(){
+        if (page > 1){
+            setDataMovie(movie);
+            setPage((page - 1));
+        }
     }
 
     
@@ -101,8 +195,6 @@ export default function Search({name: input}){
                     showsVerticalScrollIndicator={false}
                     keyExtractor={(item) => String(item.id)}
                     renderItem={({item}) => <SearchItem data={item} navigatePage={ () => navigateDetailPage(item) } />}
-                    onEndReachedThreshold={0.3}
-                    onEndReached={() => loadMore() }
                     initialNumToRender={1}
                     ListFooterComponent={loadLoader()}
             />
