@@ -164,7 +164,12 @@ function Detail(){
 
             <ScrollView showsVerticalScrollIndicator={false} >
                 <Title>Descrição</Title>
-                <Description>{movie?.overview}</Description>
+                {movie?.overview ? (
+                    <Description>{movie?.overview}</Description>
+                ) : (
+                    <Description>Sem descrição</Description>
+                )}
+                
             </ScrollView>
 
             <Modal animationType='slide' transparent={true}  visible={openLink}>

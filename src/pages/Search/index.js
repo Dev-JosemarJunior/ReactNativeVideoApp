@@ -22,7 +22,6 @@ export default function Search({name: input}){
     const [dataMovie, setDataMovie] = useState([])
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
-    const [refreshing, setRefreshing] = useState(false);
     const [totalPagesResults, setTotalPageResults] = useState(0);
 
     useEffect(() => {
@@ -38,14 +37,11 @@ export default function Search({name: input}){
                 }
             })
 
-            
-
             if(isActive){
-                if ( response.data.total_pages >= page){
+                if (response.data.total_pages >= page){
                     const newMovies = response.data.results;
                     setMovie([...dataMovie, ...newMovies]);
                     setLoading(false);
-                    setRefreshing(false);
                 } 
                 setTotalPageResults(response.data.total_pages);
             }
@@ -58,7 +54,6 @@ export default function Search({name: input}){
 
         return () => {
             isActive = false;
-            setRefreshing(false);
             
         }
 
@@ -85,7 +80,6 @@ export default function Search({name: input}){
     
     function loadMore(){
         if (totalPagesResults > page){
-            setRefreshing(true);
             setDataMovie(movie);
             setPage((page + 1));
         }
