@@ -2,9 +2,11 @@ import React, {useState, useEffect} from "react";
 import { 
     Container, 
     Name,
-    ListMovies
+    ListMovies,
+    LoadContainer,
+    ButtonLoader
 } from './styles'
-import {ScrollView} from 'react-native'
+import { ActivityIndicator } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import api, { key } from '../../Services/api';
@@ -17,8 +19,11 @@ export default function Search({name: input}){
     const route = useRoute();
 
     const [movie, setMovie] = useState([]);
+    const [dataMovie, setDataMovie] = useState([])
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
+    const [refreshing, setRefreshing] = useState(false);
+    const [totalPagesResults, setTotalPageResults] = useState(0);
 
     useEffect(() => {
         let isActive = true;
@@ -33,42 +38,61 @@ export default function Search({name: input}){
                 }
             })
 
+            
+
             if(isActive){
-                setMovie(response.data.results);
-                setLoading(false);
-                // console.log(response.data.results);
+                if ( response.data.total_pages >= page){
+                    const newMovies = response.data.results;
+                    setMovie([...dataMovie, ...newMovies]);
+                    setLoading(false);
+                    setRefreshing(false);
+                } 
+                setTotalPageResults(response.data.total_pages);
             }
         }
 
         if(isActive){
             getSearchMovie();
+            
         }
 
         return () => {
             isActive = false;
+            setRefreshing(false);
+            
         }
 
-    }, [])
+    }, [page])
 
     function navigateDetailPage(item){
         navigation.navigate('Detail', { id: item.id} );
     }
 
-    function handleSearchMovie(){
+    const loadLoader = () =>{
 
-        if (input === ''){
-            return;
+            return(
+                <LoadContainer>
+                    {totalPagesResults > page ? (
+                        <LoadContainer>
+                            <ActivityIndicator  size="large" color="#FFF"/>
+                        </LoadContainer>
+                    ): null}
+                    
+                </LoadContainer>
+            )
+        
+    }
+    
+    function loadMore(){
+        if (totalPagesResults > page){
+            setRefreshing(true);
+            setDataMovie(movie);
+            setPage((page + 1));
         }
-        navigation.navigate('Search', {name: input});
-        setInput('');
+        // alert('Passando por aqui');
     }
 
-    const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
-        const paddingToBottom = 20;
-        return layoutMeasurement.height + contentOffset.y >=
-          contentSize.height - paddingToBottom;
-      };
-
+    
     if(loading){
         return(
             <Container>
@@ -76,22 +100,19 @@ export default function Search({name: input}){
             </Container>
         )
     }
-
     return(
-        <Container
-            onScroll={({nativeEvent}) => {
-            if (isCloseToBottom(nativeEvent)) {
-              setPage((page += 1));
-            }
-          }}
-          scrollEventThrottle={400}
-        >
+        <Container>
             <ListMovies
                     data={movie}
                     showsVerticalScrollIndicator={false}
                     keyExtractor={(item) => String(item.id)}
                     renderItem={({item}) => <SearchItem data={item} navigatePage={ () => navigateDetailPage(item) } />}
-                />
+                    onEndReachedThreshold={0.3}
+                    onEndReached={() => loadMore() }
+                    initialNumToRender={1}
+                    ListFooterComponent={loadLoader()}
+            />
         </Container>
-    )
+        
+    )   
 }
