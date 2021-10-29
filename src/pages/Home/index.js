@@ -104,7 +104,7 @@ function Home(){
         navigation.navigate('Detail', { id: item.id} );
     }
 
-    function handleSearchMovie(){
+    function handleSearchMovie(input){
 
         if (input === ''){
             return;
@@ -137,7 +137,7 @@ function Home(){
                     value={input}
                     onChangeText={(text) => setInput(text) }
                 />
-                <SearchButton onPress={handleSearchMovie}>
+                <SearchButton onPress={() => handleSearchMovie(input)}>
                     <Feather name="search" size={30} color="#FFF" />
                 </SearchButton>
             </SearchContainer>

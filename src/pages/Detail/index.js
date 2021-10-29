@@ -129,10 +129,22 @@ function Detail(){
                 </HeaderButton>
             </Header>
             
-            <Banner 
+            { movie?.backdrop_path ? (
+                <Banner 
+                resizeMethod="resize"
+                source={{ uri: `https://image.tmdb.org/t/p/original/${movie?.backdrop_path}` }}
+                />
+            ) : (
+                <Banner 
+                resizeMethod="resize"
+                source={ require('../../assets/noimage.png') }
+                />
+            )}
+
+            {/* <Banner 
                 resizeMethod="resize"
                 source={{uri: `https://image.tmdb.org/t/p/original/${movie.backdrop_path}` }}
-            />
+            /> */}
  
             <ButtonLink onPress={ () => setOpenLink(true) }>
                 <Feather name='link' size={28} color="#FFF"/>

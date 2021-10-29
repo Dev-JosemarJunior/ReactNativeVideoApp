@@ -4,7 +4,11 @@ import {
     Name,
     ListMovies,
     LoadContainer,
-    ButtonLoader
+    ButtonLoader,
+    SearchView,
+    BigSearchView,
+    NotFound,
+    NameTop
 } from './styles'
 import { ActivityIndicator } from 'react-native'
 import { Feather } from '@expo/vector-icons'
@@ -13,7 +17,7 @@ import api, { key } from '../../Services/api';
 import SearchItem from '../../components/SearchItem'
 
 
-export default function Search(){
+export default function Search({name: input}){
     
     const navigation = useNavigation();
     const route = useRoute();
@@ -37,8 +41,8 @@ export default function Search(){
                 }
             })
 
+            setDataMovie(response.data.total_pages);
             if(isActive){
-
                 if (response.data.total_pages >= page){
                     const newMovies = response.data.results;
                     setMovie(newMovies);
@@ -50,6 +54,7 @@ export default function Search(){
 
         if(isActive){
             getSearchMovie();
+            
         }
 
         return () => {
@@ -76,13 +81,24 @@ export default function Search(){
                             />
                             </ButtonLoader>
                             <Name>{page} / {totalPagesResults}</Name>
-                            <ButtonLoader activeOpacity={0.7} onPress={ () => loadMore()}>
+                            {totalPagesResults > 1 ? (
+                                <ButtonLoader activeOpacity={0.7} onPress={ () => loadMore()}>
                                 <Feather
                                     name="arrow-right"
                                     size={28}
                                     color="#FFF"
                                 />
-                            </ButtonLoader>
+                                </ButtonLoader>
+                            ) : (
+                                <ButtonLoader activeOpacity={0.7} onPress={ () => loadMore()}>
+                                <Feather
+                                    name=""
+                                    size={28}
+                                    color="#FFF"
+                                />
+                                </ButtonLoader>
+                            )}
+                            
                     </LoadContainer>
                 )
             } else if (page < totalPagesResults ){
@@ -126,70 +142,57 @@ export default function Search(){
                     </LoadContainer>
                 )
             }
-            return(
-                <LoadContainer>
-                    {totalPagesResults > page ? (
-                        
-                        <LoadContainer>
-                            
-                            <ButtonLoader activeOpacity={0.7} onPress={ () => loadLess()}>
-                                <Feather
-                                    name="arrow-left"
-                                    size={28}
-                                    color="#FFF"
-                                />
-                            </ButtonLoader>
-                            <Name>{page} / {totalPagesResults}</Name>
-                            <ButtonLoader activeOpacity={0.7} onPress={ () => loadMore()}>
-                                <Feather
-                                    name="arrow-right"
-                                    size={28}
-                                    color="#FFF"
-                                 />
-                            </ButtonLoader>
-                        </LoadContainer>
-                    ): (
-                        <LoadContainer>
-                            <ButtonLoader activeOpacity={0.7} onPress={ () => loadLess()}>
-                                <Feather
-                                    name="arrow-left"
-                                    size={28}
-                                    color="#FFF"
-                                />
-                            </ButtonLoader>
-                            <Name>{page} / {totalPagesResults}</Name>
-                        </LoadContainer>
-                    )}
-                    
-                </LoadContainer>
-            )
         
     }
     
     function loadMore(){
         if (totalPagesResults > page){
-            setDataMovie(movie);
             setPage((page + 1));
         }
     }
 
     function loadLess(){
         if (page > 1){
-            setDataMovie(movie);
             setPage((page - 1));
         }
     }
 
+    function noSearchResults(){
+        if(dataMovie === 0){
+            return(
+                <BigSearchView>
+                    <ButtonLoader activeOpacity={0.7}>
+                                <Feather
+                                    name="frown"
+                                    size={80}
+                                    color="#FFF"
+                                />
+                    </ButtonLoader>
+                    <NotFound>Não foram encontrados resultados para "{route?.params?.name}"</NotFound>
+                </BigSearchView>
+            )
+        } else {
+            return(
+                <BigSearchView>
+                    <ActivityIndicator  size="large" color="#FFF"/>
+                </BigSearchView>
+            )
+        }
+
+        
+    }
     
     if(loading){
         return(
-            <Container>
-                
-            </Container>
+            noSearchResults()
         )
     }
+
     return(
         <Container>
+            <SearchView>
+                <NameTop>Exibindo resultados para "{route?.params?.name}"</NameTop>
+            </SearchView>
             <ListMovies
                     data={movie}
                     showsVerticalScrollIndicator={false}

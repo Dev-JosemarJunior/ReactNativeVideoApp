@@ -29,7 +29,7 @@ function StackRoutes(){
                 }}
             />
 
-                <Stack.Screen  
+            <Stack.Screen  
                 name='Search' 
                 component={Search} 
 
